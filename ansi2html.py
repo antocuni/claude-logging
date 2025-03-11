@@ -25,6 +25,10 @@ BG_MAGENTA = 45
 BG_CYAN = 46
 BG_WHITE = 47
 
+# True color indicators
+FG_TRUE_COLOR = 38
+BG_TRUE_COLOR = 48
+
 # Regular expression to find ANSI escape sequences
 ANSI_ESCAPE_RE = re.compile(r'\x1b\[((?:\d+;)*\d*)m')
 
@@ -42,22 +46,38 @@ def ansi_to_css(ansi_codes):
     fg_color = None
     bg_color = None
     bold = False
-
-    for code in ansi_codes:
+    
+    i = 0
+    while i < len(ansi_codes):
+        code = ansi_codes[i]
+        
         if code == RESET:
             return []  # Reset all styles
         elif code == BOLD:
             bold = True
+        # Handle true color (24-bit) foreground: ESC[38;2;r;g;bm
+        elif code == FG_TRUE_COLOR and i + 4 < len(ansi_codes) and ansi_codes[i+1] == 2:
+            r, g, b = ansi_codes[i+2], ansi_codes[i+3], ansi_codes[i+4]
+            styles.append(f"fg-true-color")
+            styles.append(f"fg-rgb-{r}-{g}-{b}")
+            i += 4  # Skip the parameters we just processed
+        # Handle true color (24-bit) background: ESC[48;2;r;g;bm
+        elif code == BG_TRUE_COLOR and i + 4 < len(ansi_codes) and ansi_codes[i+1] == 2:
+            r, g, b = ansi_codes[i+2], ansi_codes[i+3], ansi_codes[i+4]
+            styles.append(f"bg-true-color")
+            styles.append(f"bg-rgb-{r}-{g}-{b}")
+            i += 4  # Skip the parameters we just processed
+        # Handle standard foreground colors
         elif FG_BLACK <= code <= FG_WHITE:
             fg_color = code - FG_BLACK
+            styles.append(f"c{fg_color}")
+        # Handle standard background colors
         elif BG_BLACK <= code <= BG_WHITE:
             bg_color = code - BG_BLACK
+            styles.append(f"bg{bg_color}")
+        
+        i += 1
 
-    if fg_color is not None:
-        # Map ANSI colors to CSS classes
-        styles.append(f"c{fg_color}")
-    if bg_color is not None:
-        styles.append(f"bg{bg_color}")
     if bold:
         styles.append("bold")
 
@@ -266,6 +286,14 @@ def generate_html(input_text):
         .bg6 {{ background-color: var(--bg6-color); }}
         .bg7 {{ background-color: var(--bg7-color); }}
         
+        /* True colors */
+        .fg-true-color {{ }}  /* Base class for true color foreground */
+        .bg-true-color {{ }}  /* Base class for true color background */
+        
+        /* Generated dynamically for true colors */
+        [class*="fg-rgb-"] {{ color: rgb(var(--rgb-values)); }}
+        [class*="bg-rgb-"] {{ background-color: rgb(var(--rgb-values)); }}
+        
         /* Text styles */
         .bold {{ font-weight: bold; }}
     </style>
@@ -288,6 +316,29 @@ def generate_html(input_text):
             body.setAttribute('data-theme', isLightTheme ? 'dark' : 'light');
             themeToggle.textContent = isLightTheme ? 'Switch to Light Theme' : 'Switch to Dark Theme';
         }});
+        
+        // Process RGB true color classes
+        function processRgbColors() {{
+            // Process foreground RGB colors
+            document.querySelectorAll('[class*="fg-rgb-"]').forEach(el => {{
+                const classList = Array.from(el.classList);
+                const rgbClass = classList.find(cls => cls.startsWith('fg-rgb-'));
+                if (rgbClass) {{
+                    const [_, __, r, g, b] = rgbClass.split('-');
+                    el.style.setProperty('--rgb-values', `${{r}},${{g}},${{b}}`);
+                }}
+            }});
+            
+            // Process background RGB colors
+            document.querySelectorAll('[class*="bg-rgb-"]').forEach(el => {{
+                const classList = Array.from(el.classList);
+                const rgbClass = classList.find(cls => cls.startsWith('bg-rgb-'));
+                if (rgbClass) {{
+                    const [_, __, r, g, b] = rgbClass.split('-');
+                    el.style.setProperty('--rgb-values', `${{r}},${{g}},${{b}}`);
+                }}
+            }});
+        }}
         
         // Line highlighting and permalinks
         let firstSelectedLine = null;
@@ -359,10 +410,13 @@ def generate_html(input_text):
         
         // Handle permalink on page load and when hash changes
         window.addEventListener('hashchange', handlePermalink);
-        document.addEventListener('DOMContentLoaded', handlePermalink);
+        document.addEventListener('DOMContentLoaded', () => {{
+            handlePermalink();
+            processRgbColors();
+        }});
         
-        // Execute permalink handling when the script runs
-        handlePermalink();
+        // Process colors immediately
+        processRgbColors();
     </script>
 </body>
 </html>'''
