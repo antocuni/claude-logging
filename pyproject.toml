@@ -3,12 +3,12 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pytermdump"
+name = "claude-logging"
 version = "0.1.0"
 authors = [
     {name = "User"}
 ]
-description = "Python wrapper for termdump utility"
+description = "Python wrapper for termdump utility with HTML conversion for Claude logs"
 requires-python = ">=3.6"
 license = {text = "MIT"}
 classifiers = [
@@ -17,8 +17,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.scripts]
+claude-logging = "claude_logging:main"
+
 [tool.setuptools]
-packages = []
+py-modules = ["claude_logging", "ansi2html", "__init__"]
 
 [[tool.setuptools.ext-modules]]
 name = "pytermdump"
