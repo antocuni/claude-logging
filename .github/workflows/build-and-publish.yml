@@ -12,7 +12,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, windows-2019, macos-11]
-        python: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        # We only need to build once with Python 3.8 for the stable ABI
+        python: ["3.8"]
 
     steps:
       - uses: actions/checkout@v3
@@ -31,15 +32,18 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir wheelhouse
         env:
+          # Build only for Python 3.8 but with stable ABI
           CIBW_BUILD: cp${{ matrix.python }}-*
-          CIBW_ARCHS_MACOS: x86_64 arm64
-          CIBW_ARCHS_WINDOWS: AMD64
-          CIBW_ARCHS_LINUX: auto64
+          # Use the stable ABI (wheels will work on 3.8+)
+          CIBW_BUILD_FRONTEND: "pip; args: --config-settings=--global-option=--py-limited-api=cp38"
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
+          CIBW_ARCHS_WINDOWS: "AMD64"
+          CIBW_ARCHS_LINUX: "auto64"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.python }}
+          name: wheels-${{ matrix.os }}-stable-abi
           path: ./wheelhouse/*.whl
 
   build_sdist:

@@ -1,25 +1,37 @@
 #define PY_SSIZE_T_CLEAN
+#define Py_LIMITED_API 0x03080000  // Target Python 3.8 limited API
 #include <Python.h>
 
 // No need to define TERMDUMP_LIB anymore since it's the default behavior
 #include "termdump.c"
 
 static PyObject* pytermdump_termdump(PyObject *self, PyObject *args) {
-    Py_buffer buffer;
+    PyObject *bytes_obj;
     PyObject *result = NULL;
     char *processed_data;
     size_t processed_len;
+    const char *data;
+    Py_ssize_t data_len;
 
-    /* Parse the bytes/buffer object */
-    if (!PyArg_ParseTuple(args, "y*", &buffer)) {
+    /* Parse the bytes object */
+    if (!PyArg_ParseTuple(args, "O", &bytes_obj)) {
         return NULL;
     }
 
-    /* Process the buffer */
-    processed_data = process_buffer((const unsigned char*)buffer.buf, buffer.len, &processed_len);
+    /* Make sure it's bytes */
+    if (!PyBytes_Check(bytes_obj)) {
+        PyErr_SetString(PyExc_TypeError, "Argument must be bytes");
+        return NULL;
+    }
+
+    /* Get the bytes data */
+    data = PyBytes_AsString(bytes_obj);
+    data_len = PyBytes_Size(bytes_obj);
+
+    /* Process the data */
+    processed_data = process_buffer((const unsigned char*)data, data_len, &processed_len);
     if (!processed_data) {
         PyErr_SetString(PyExc_MemoryError, "Failed to allocate memory for result");
-        PyBuffer_Release(&buffer);
         return NULL;
     }
 
@@ -28,7 +40,6 @@ static PyObject* pytermdump_termdump(PyObject *self, PyObject *args) {
     
     /* Clean up */
     free(processed_data);
-    PyBuffer_Release(&buffer);
     
     return result;
 }

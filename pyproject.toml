@@ -42,9 +42,17 @@ packages = ["claude_logging"]
 name = "claude_logging.pytermdump"
 sources = ["claude_logging/pytermdump.c"]
 extra-compile-args = ["-Wall"]
+py-limited-api = true  # Use the stable ABI
 
 [tool.cibuildwheel]
+# Build options
+build = "cp38-* cp39-* cp310-* cp311-* cp312-*"  # These are still needed for cibuildwheel
 # Skip PyPy builds since we have a C extension
 skip = "pp*"
 # Make sure we test the package after building
 test-command = "python -c \"import claude_logging; from claude_logging import pytermdump\""
+# Use the stable ABI for compatibility across Python versions
+build-frontend = {name = "pip", args = ["--config-settings=--global-option=--py-limited-api=cp38"]}
+# By default, build with stable ABI for wide Python compatibility
+manylinux-x86_64-image = "manylinux2014"
+manylinux-i686-image = "manylinux2014"
