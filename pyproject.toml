@@ -51,8 +51,6 @@ build = "cp38-*"
 skip = "pp*"
 # Make sure we test the package after building
 test-command = "python -c \"import claude_logging; from claude_logging import pytermdump\""
-# Use the stable ABI for compatibility across Python versions
-build-frontend = {name = "pip", args = ["--config-settings=--global-option=--py-limited-api=cp38"]}
 # By default, build with stable ABI for wide Python compatibility
 manylinux-x86_64-image = "manylinux2014"
 manylinux-i686-image = "manylinux2014"
