@@ -46,11 +46,11 @@ def ansi_to_css(ansi_codes):
     fg_color = None
     bg_color = None
     bold = False
-    
+
     i = 0
     while i < len(ansi_codes):
         code = ansi_codes[i]
-        
+
         if code == RESET:
             return []  # Reset all styles
         elif code == BOLD:
@@ -75,7 +75,7 @@ def ansi_to_css(ansi_codes):
         elif BG_BLACK <= code <= BG_WHITE:
             bg_color = code - BG_BLACK
             styles.append(f"bg{bg_color}")
-        
+
         i += 1
 
     if bold:
@@ -124,7 +124,7 @@ def generate_html(input_text):
     """Generate complete HTML with the converted content."""
     lines = input_text.split('\n')
     html_lines = []
-    
+
     for i, line in enumerate(lines, 1):
         html_content = ansi_to_html(line)
         html_lines.append(
@@ -133,9 +133,9 @@ def generate_html(input_text):
             f'<span class="line-content">{html_content}</span>'
             f'</div>'
         )
-    
+
     html_content = '\n'.join(html_lines)
-    
+
     # Create the full HTML document
     return f'''<!DOCTYPE html>
 <html lang="en">
@@ -146,12 +146,12 @@ def generate_html(input_text):
     <style>
         :root {{
             /* Dark theme (default) */
-            --bg-color: #1e1e1e;
+            --bg-color: #101010;
             --text-color: #f0f0f0;
             --line-number-color: #888;
             --line-highlight-color: rgba(255, 255, 100, 0.1);
             --border-color: #444;
-            
+
             /* ANSI colors - Dark theme */
             --c0-color: #a0a0a0; /* black (gray in dark mode) */
             --c1-color: #f44336; /* red */
@@ -161,7 +161,7 @@ def generate_html(input_text):
             --c5-color: #9c27b0; /* magenta */
             --c6-color: #00bcd4; /* cyan */
             --c7-color: #ffffff; /* white */
-            
+
             /* Background colors - Dark theme */
             --bg0-color: #000000; /* black */
             --bg1-color: #f44336; /* red */
@@ -179,7 +179,7 @@ def generate_html(input_text):
             --line-number-color: #999;
             --line-highlight-color: rgba(255, 220, 0, 0.2);
             --border-color: #ddd;
-            
+
             /* ANSI colors - Light theme */
             --c0-color: #6a6a6a; /* black */
             --c1-color: #d32f2f; /* red */
@@ -189,7 +189,7 @@ def generate_html(input_text):
             --c5-color: #7b1fa2; /* magenta */
             --c6-color: #0097a7; /* cyan */
             --c7-color: #333333; /* white (dark in light mode) */
-            
+
             /* Background colors - Light theme */
             --bg0-color: #f0f0f0; /* black */
             --bg1-color: #ffcdd2; /* red */
@@ -200,7 +200,7 @@ def generate_html(input_text):
             --bg6-color: #b2ebf2; /* cyan */
             --bg7-color: #ffffff; /* white */
         }}
-        
+
         body {{
             font-family: 'Courier New', monospace;
             line-height: 1.2;
@@ -209,8 +209,9 @@ def generate_html(input_text):
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: all 0.3s ease;
+            font-size: 16px; /* Control base font size */
         }}
-        
+
         #controls {{
             position: fixed;
             top: 10px;
@@ -221,7 +222,7 @@ def generate_html(input_text):
             border: 1px solid var(--border-color);
             border-radius: 4px;
         }}
-        
+
         #theme-toggle {{
             padding: 5px 10px;
             background-color: var(--text-color);
@@ -230,23 +231,29 @@ def generate_html(input_text):
             border-radius: 3px;
             cursor: pointer;
         }}
-        
+
         #container {{
             padding: 10px 0;
+            line-height: 0; /* Remove default spacing between lines */
         }}
-        
+
         .line {{
             display: flex;
             white-space: pre;
             position: relative;
             padding: 0 10px;
             cursor: pointer;
+            margin: 0;
+            line-height: 1.2;
+            /* Eliminate gaps between lines */
+            border-bottom: 0;
+            min-height: 1.2em;
         }}
-        
+
         .line:hover {{
             background-color: rgba(128, 128, 128, 0.1);
         }}
-        
+
         .line-number {{
             display: inline-block;
             width: 40px;
@@ -255,17 +262,20 @@ def generate_html(input_text):
             text-align: right;
             user-select: none;
         }}
-        
+
         .line-content {{
             flex-grow: 1;
             padding-left: 10px;
             border-left: 1px solid var(--border-color);
+            /* Ensure content stretches full height of line */
+            display: inline-block;
+            height: 100%;
         }}
-        
+
         .line.highlighted {{
             background-color: var(--line-highlight-color);
         }}
-        
+
         /* ANSI colors */
         .c0 {{ color: var(--c0-color); }}  /* black */
         .c1 {{ color: var(--c1-color); }}  /* red */
@@ -275,7 +285,7 @@ def generate_html(input_text):
         .c5 {{ color: var(--c5-color); }}  /* magenta */
         .c6 {{ color: var(--c6-color); }}  /* cyan */
         .c7 {{ color: var(--c7-color); }}  /* white */
-        
+
         /* Background colors */
         .bg0 {{ background-color: var(--bg0-color); }}
         .bg1 {{ background-color: var(--bg1-color); }}
@@ -285,15 +295,27 @@ def generate_html(input_text):
         .bg5 {{ background-color: var(--bg5-color); }}
         .bg6 {{ background-color: var(--bg6-color); }}
         .bg7 {{ background-color: var(--bg7-color); }}
-        
+
         /* True colors */
         .fg-true-color {{ }}  /* Base class for true color foreground */
         .bg-true-color {{ }}  /* Base class for true color background */
-        
+
         /* Generated dynamically for true colors */
         [class*="fg-rgb-"] {{ color: rgb(var(--rgb-values)); }}
-        [class*="bg-rgb-"] {{ background-color: rgb(var(--rgb-values)); }}
-        
+        [class*="bg-rgb-"] {{
+            background-color: rgb(var(--rgb-values));
+            display: inline-block;
+            height: 100%;
+            margin-bottom: -1px; /* Eliminates gaps between colored backgrounds */
+        }}
+
+        /* Fix standard background colors too */
+        [class*="bg"] {{
+            display: inline-block;
+            height: 100%;
+            margin-bottom: -1px; /* Eliminates gaps between colored backgrounds */
+        }}
+
         /* Text styles */
         .bold {{ font-weight: bold; }}
     </style>
@@ -305,18 +327,18 @@ def generate_html(input_text):
     <div id="container">
 {html_content}
     </div>
-    
+
     <script>
         // Theme toggling
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        
+
         themeToggle.addEventListener('click', () => {{
             const isLightTheme = body.getAttribute('data-theme') === 'light';
             body.setAttribute('data-theme', isLightTheme ? 'dark' : 'light');
             themeToggle.textContent = isLightTheme ? 'Switch to Light Theme' : 'Switch to Dark Theme';
         }});
-        
+
         // Process RGB true color classes
         function processRgbColors() {{
             // Process foreground RGB colors
@@ -328,7 +350,7 @@ def generate_html(input_text):
                     el.style.setProperty('--rgb-values', `${{r}},${{g}},${{b}}`);
                 }}
             }});
-            
+
             // Process background RGB colors
             document.querySelectorAll('[class*="bg-rgb-"]').forEach(el => {{
                 const classList = Array.from(el.classList);
@@ -339,41 +361,41 @@ def generate_html(input_text):
                 }}
             }});
         }}
-        
+
         // Line highlighting and permalinks
         let firstSelectedLine = null;
         const lines = document.querySelectorAll('.line');
-        
+
         function clearHighlights() {{
             lines.forEach(line => line.classList.remove('highlighted'));
         }}
-        
+
         function highlightLine(lineNum) {{
             document.getElementById(`L${{lineNum}}`).classList.add('highlighted');
             setPermalink(lineNum);
         }}
-        
+
         function highlightRange(start, end) {{
             if (start > end) {{
                 [start, end] = [end, start]; // Swap if needed
             }}
-            
+
             for (let i = start; i <= end; i++) {{
                 document.getElementById(`L${{i}}`).classList.add('highlighted');
             }}
-            
+
             setPermalink(start, end);
         }}
-        
+
         function setPermalink(start, end) {{
             const hash = end ? `L${{start}}-L${{end}}` : `L${{start}}`;
             window.history.replaceState(null, '', `#${{hash}}`);
         }}
-        
+
         lines.forEach(line => {{
             line.addEventListener('click', (event) => {{
                 const lineNum = parseInt(line.getAttribute('data-line-number'));
-                
+
                 if (event.shiftKey && firstSelectedLine) {{
                     clearHighlights();
                     highlightRange(firstSelectedLine, lineNum);
@@ -385,12 +407,12 @@ def generate_html(input_text):
                 }}
             }});
         }});
-        
+
         // Handle initial hash (permalink)
         function handlePermalink() {{
             const hash = window.location.hash;
             if (!hash) return;
-            
+
             if (hash.includes('-')) {{
                 const [start, end] = hash.slice(1).split('-').map(id => parseInt(id.slice(1)));
                 if (!isNaN(start) && !isNaN(end)) {{
@@ -407,14 +429,14 @@ def generate_html(input_text):
                 }}
             }}
         }}
-        
+
         // Handle permalink on page load and when hash changes
         window.addEventListener('hashchange', handlePermalink);
         document.addEventListener('DOMContentLoaded', () => {{
             handlePermalink();
             processRgbColors();
         }});
-        
+
         // Process colors immediately
         processRgbColors();
     </script>
@@ -432,13 +454,13 @@ def main():
 
     # Read input
     input_text = args.input_file.read()
-    
+
     # Generate HTML
     html = generate_html(input_text)
-    
+
     # Write output
     args.output.write(html)
-    
+
     # Close files if not stdin/stdout
     if args.input_file is not sys.stdin:
         args.input_file.close()
