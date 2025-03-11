@@ -32,8 +32,10 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir wheelhouse
         env:
-          # Build only for Python 3.8 but with stable ABI
-          CIBW_BUILD: cp${{ matrix.python }}-*
+          # Build only for Python 3.8 (with stable ABI)
+          CIBW_BUILD: cp38-*
+          # Skip PyPy builds
+          CIBW_SKIP: pp*
           # Use the stable ABI (wheels will work on 3.8+)
           CIBW_BUILD_FRONTEND: "pip; args: --config-settings=--global-option=--py-limited-api=cp38"
           CIBW_ARCHS_MACOS: "x86_64 arm64"

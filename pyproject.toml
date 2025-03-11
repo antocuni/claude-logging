@@ -45,8 +45,8 @@ extra-compile-args = ["-Wall"]
 py-limited-api = true  # Use the stable ABI
 
 [tool.cibuildwheel]
-# Build options
-build = "cp38-* cp39-* cp310-* cp311-* cp312-*"  # These are still needed for cibuildwheel
+# Build only CPython 3.8 (which will work for 3.8+ with stable ABI)
+build = "cp38-*"
 # Skip PyPy builds since we have a C extension
 skip = "pp*"
 # Make sure we test the package after building
