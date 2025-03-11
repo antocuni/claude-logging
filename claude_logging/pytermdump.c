@@ -42,7 +42,7 @@ static PyMethodDef PytermdumpMethods[] = {
 /* Module definition */
 static struct PyModuleDef pytermdumpmodule = {
     PyModuleDef_HEAD_INIT,
-    "pytermdump",     /* name of module */
+    "claude_logging.pytermdump",     /* name of module */
     "Python wrapper for termdump utility", /* module documentation */
     -1,               /* size of per-interpreter state (-1 = in global vars) */
     PytermdumpMethods

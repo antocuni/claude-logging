@@ -7,10 +7,10 @@ from pathlib import Path
 
 # Import our local modules
 try:
-    import pytermdump
-    from ansi2html import generate_html
+    from claude_logging import pytermdump
+    from claude_logging.ansi2html import generate_html
 except ImportError:
-    print("Error: Required modules not found. Make sure pytermdump is installed and ansi2html.py is in the same directory.")
+    print("Error: Required modules not found. Make sure the claude_logging package is properly installed.")
     sys.exit(1)
 
 def dump_command(args):
@@ -60,6 +60,16 @@ def dump_command(args):
             print(f"Error writing output file: {e}", file=sys.stderr)
             sys.exit(1)
 
+def get_default_output_path(input_file):
+    """Generate a default output filename in the current directory with .html extension"""
+    if input_file == '-':
+        return '-'  # Use stdout for stdin input
+        
+    input_path = Path(input_file)
+    # Use just the filename without directory, and replace extension with .html
+    filename = input_path.name
+    return str(Path(filename).with_suffix('.html'))
+
 def main():
     """Main entry point for the claude-logging CLI"""
     parser = argparse.ArgumentParser(description='Claude logging utilities')
@@ -70,13 +80,16 @@ def main():
                                        help='Process a file with terminal escape sequences and convert to HTML')
     dump_parser.add_argument('input_file', 
                            help='Input file (use "-" for stdin)')
-    dump_parser.add_argument('-o', '--output', dest='output_file', default='-',
-                           help='Output file (default: stdout)')
+    dump_parser.add_argument('-o', '--output', dest='output_file',
+                           help='Output file (default: <input_file>.html or stdout for stdin)')
     
     # Parse the arguments
     args = parser.parse_args()
     
     if args.command == 'dump':
+        # If no output file is specified, use default naming
+        if args.output_file is None:
+            args.output_file = get_default_output_path(args.input_file)
         dump_command(args)
     else:
         parser.print_help()

@@ -18,12 +18,12 @@ classifiers = [
 ]
 
 [project.scripts]
-claude-logging = "claude_logging:main"
+claude-logging = "claude_logging.__main__:main"
 
 [tool.setuptools]
-py-modules = ["claude_logging", "ansi2html", "__init__"]
+packages = ["claude_logging"]
 
 [[tool.setuptools.ext-modules]]
-name = "pytermdump"
-sources = ["pytermdump.c"]
+name = "claude_logging.pytermdump"
+sources = ["claude_logging/pytermdump.c"]
 extra-compile-args = ["-Wall"]
