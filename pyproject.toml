@@ -6,16 +6,31 @@ build-backend = "setuptools.build_meta"
 name = "claude-logging"
 version = "0.1.0"
 authors = [
-    {name = "User"}
+    {name = "Antonio Cuni"}
 ]
-description = "Python wrapper for termdump utility with HTML conversion for Claude logs"
-requires-python = ">=3.6"
+description = "Save logs of claude code, and convert them into HTML"
+requires-python = ">=3.8"
+readme = "README.md"
 license = {text = "MIT"}
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Terminals",
+    "Topic :: Text Processing :: Markup :: HTML",
 ]
+keywords = ["claude", "logging", "ansi", "terminal", "html", "conversion"]
+
+[project.urls]
+"Homepage" = "https://github.com/antocuni/claude-logging"
+"Bug Tracker" = "https://github.com/antocuni/claude-logging/issues"
 
 [project.scripts]
 claude-logging = "claude_logging.__main__:main"
@@ -27,3 +42,9 @@ packages = ["claude_logging"]
 name = "claude_logging.pytermdump"
 sources = ["claude_logging/pytermdump.c"]
 extra-compile-args = ["-Wall"]
+
+[tool.cibuildwheel]
+# Skip PyPy builds since we have a C extension
+skip = "pp*"
+# Make sure we test the package after building
+test-command = "python -c \"import claude_logging; from claude_logging import pytermdump\""
