@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-20.04]
         # We only need to build once with Python 3.8 for the stable ABI
         python: ["3.8"]
 
@@ -39,7 +39,6 @@ jobs:
           # Skip PyPy builds
           CIBW_SKIP: pp*
           # Python stable ABI is enabled in pyproject.toml with py-limited-api = true
-          CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_ARCHS_LINUX: "auto64"
           # Add environment variable for py-limited-api
           CIBW_ENVIRONMENT: "SETUPTOOLS_EXT_SUFFIX=.abi3.so PY_LIMITED_API=cp38"
