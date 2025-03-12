@@ -1,0 +1,11 @@
+# Include the termdump.c file needed for the extension
+include claude_logging/termdump.c
+
+# Include license and readme files
+include LICENSE README.md
+
+# Include test files
+include tests/*.py
+
+# Include configuration files
+include pyproject.toml setup.cfg
