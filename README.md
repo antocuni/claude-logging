@@ -4,17 +4,29 @@ Automatically keep logs of "claude code" sessions, and convert them to HTML.
 
 ## Features
 
-- Processes ANSI escape sequences in terminal output
+- Automatically log `claude` sessions in `~/.claude/logs`
+- Convert logged session into HTML files
 - Strips control characters and preserves text formatting
 - Converts terminal output to styled HTML
 - Supports syntax highlighting, bold text, and colors
 - Includes line numbering and theme toggling in the HTML output
-- Automatically records claude sessions with timestamped logs
 
 ## Installation
 
 ```bash
 pip install claude-logging
+```
+
+It is also possible to run it directly using [`uxv`](https://docs.astral.sh/uv/guides/tools/):
+```
+uvx claude-logging
+```
+
+For automatic logging of _every_ invocation of `claude`, you can put an alias
+in your `~/.bashrc` or equivalent:
+
+```
+alias claude="uxv claude-logging"
 ```
 
 ## Usage
