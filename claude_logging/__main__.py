@@ -30,7 +30,7 @@ def process_single_file(input_file):
         except Exception as e:
             print(f"Error reading input file: {e}", file=sys.stderr)
             return None
-    
+
     # Process with pytermdump
     try:
         processed_data = pytermdump.termdump(input_data)
@@ -38,7 +38,7 @@ def process_single_file(input_file):
     except Exception as e:
         print(f"Error processing with pytermdump: {e}", file=sys.stderr)
         return None
-    
+
     # Convert to HTML
     try:
         html_output = generate_html(processed_text)
@@ -60,29 +60,29 @@ def dump_command(args):
     if args.output_file and args.output_file != '-' and len(args.input_files) > 1:
         print("Error: -o/--output option cannot be used with multiple input files", file=sys.stderr)
         sys.exit(1)
-    
+
     # If stdin is used, we can only process one file
     if '-' in args.input_files and len(args.input_files) > 1:
         print("Error: Cannot process stdin ('-') along with other files", file=sys.stderr)
         sys.exit(1)
-    
+
     # Process each file
     total_files = len(args.input_files)
-    
+
     for idx, input_file in enumerate(args.input_files, 1):
         # Determine output file
         if args.output_file:
             output_file = args.output_file
         else:
             output_file = get_default_output_path(input_file)
-            
+
         # Process the file
         html_output = process_single_file(input_file)
-        
+
         if html_output is None:
             # Error already reported by process_single_file
             continue
-        
+
         # Write output
         if output_file == '-':
             sys.stdout.write(html_output)
@@ -126,7 +126,7 @@ def claude_command(args):
     date = datetime.date.today().isoformat()
     n = 0
     while True:
-        log_file = os.path.join(log_dir, f"{repo_name}.{date}.{n}")
+        log_file = os.path.join(log_dir, f"{repo_name}.{date}.{n}.log")
         if not os.path.exists(log_file):
             break
         n += 1
