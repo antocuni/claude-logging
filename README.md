@@ -11,6 +11,9 @@ Automatically keep logs of "claude code" sessions, and convert them to HTML.
 - Supports syntax highlighting, bold text, and colors
 - Includes line numbering and theme toggling in the HTML output
 
+**NOTE**: this tool has largely been written by claude itself. The quality of
+the code is a direct consequence of it.
+
 ## Installation
 
 The easiest way is to run it without need of installation through [`uxv`](https://docs.astral.sh/uv/guides/tools/):
@@ -74,6 +77,10 @@ These are some of the sessions in which I used `claude` to write `claude-logging
   - [write the pytermdump C extension and setup CI to build/publish wheels](https://antocuni.github.io/files/claude-code/claude-logging/claude-logging-2.2025-03-11.1.html)
 
   - [tweaks and refinements on the claude-logging script](https://antocuni.github.io/files/claude-code/claude-logging/claude-logging-2.2025-03-12.2.html)
+
+You can click on a line or shift-click on a range of lines to generate a
+permalink to a specific part of the log. For example, this is
+[when I asked claude not to build windows wheels](https://antocuni.github.io/files/claude-code/claude-logging/claude-logging-2.2025-03-11.1.html#L4414-L4457).
 
 
 ## How it works
