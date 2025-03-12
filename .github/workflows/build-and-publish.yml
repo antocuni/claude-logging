@@ -32,6 +32,9 @@ jobs:
         run: |
           # Set environment variable for the stable ABI
           export SETUPTOOLS_ENABLE_FEATURES="legacy-editable"
+          # Explicitly add the flag for the abi3 wheel
+          export CFLAGS="-DPy_LIMITED_API=0x03080000"
+          export LDFLAGS="-DPy_LIMITED_API=0x03080000"
           python -m cibuildwheel --output-dir wheelhouse
         env:
           # Build only for Python 3.8 (with stable ABI)
@@ -40,8 +43,12 @@ jobs:
           CIBW_SKIP: pp*
           # Python stable ABI is enabled in pyproject.toml with py-limited-api = true
           CIBW_ARCHS_LINUX: "auto64"
-          # Add environment variable for py-limited-api
-          CIBW_ENVIRONMENT: "SETUPTOOLS_EXT_SUFFIX=.abi3.so PY_LIMITED_API=cp38"
+          # Add environment variables for py-limited-api
+          CIBW_ENVIRONMENT: >
+            SETUPTOOLS_EXT_SUFFIX=.abi3.so 
+            PY_LIMITED_API=cp38 
+            SETUPTOOLS_USE_DISTUTILS=stdlib 
+            PYTHONPATH=/tmp
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4

@@ -1,6 +1,12 @@
 #define PY_SSIZE_T_CLEAN
+// Make sure this is defined BEFORE including Python.h
 #define Py_LIMITED_API 0x03080000  // Target Python 3.8 limited API
 #include <Python.h>
+
+// Verify we're using limited API
+#ifndef Py_LIMITED_API
+#error "Py_LIMITED_API not defined after inclusion of Python.h"
+#endif
 
 // No need to define TERMDUMP_LIB anymore since it's the default behavior
 #include "termdump.c"
