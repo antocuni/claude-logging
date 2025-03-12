@@ -15,52 +15,85 @@ except ImportError:
     print("Error: Required modules not found. Make sure the claude_logging package is properly installed.")
     sys.exit(1)
 
-def dump_command(args):
+def process_single_file(input_file):
     """
-    Process a file with termdump and convert it to HTML.
-    This command:
-    1. Reads input file
-    2. Processes terminal escape sequences with pytermdump
-    3. Converts the processed output to HTML with ansi2html
-    4. Writes the HTML to the output file
+    Process a single file with termdump and convert it to HTML.
+    Returns the HTML output as a string or None if there was an error.
     """
     # Determine input source
-    if args.input_file == '-':
+    if input_file == '-':
         input_data = sys.stdin.buffer.read()
     else:
         try:
-            with open(args.input_file, 'rb') as f:
+            with open(input_file, 'rb') as f:
                 input_data = f.read()
         except Exception as e:
             print(f"Error reading input file: {e}", file=sys.stderr)
-            sys.exit(1)
-
+            return None
+    
     # Process with pytermdump
     try:
         processed_data = pytermdump.termdump(input_data)
         processed_text = processed_data.decode('utf-8', errors='replace')
     except Exception as e:
         print(f"Error processing with pytermdump: {e}", file=sys.stderr)
-        sys.exit(1)
-
+        return None
+    
     # Convert to HTML
     try:
         html_output = generate_html(processed_text)
+        return html_output
     except Exception as e:
         print(f"Error converting to HTML: {e}", file=sys.stderr)
-        sys.exit(1)
+        return None
 
-    # Determine output destination
-    if args.output_file == '-':
-        sys.stdout.write(html_output)
-    else:
-        try:
-            with open(args.output_file, 'w') as f:
-                f.write(html_output)
-            print(f"HTML output written to {args.output_file}", file=sys.stderr)
-        except Exception as e:
-            print(f"Error writing output file: {e}", file=sys.stderr)
-            sys.exit(1)
+def dump_command(args):
+    """
+    Process files with termdump and convert them to HTML.
+    This command:
+    1. Processes each input file
+    2. Converts each file to HTML
+    3. Writes HTML files with appropriate names
+    4. Shows progress to stdout
+    """
+    # Check if output option is used with multiple files
+    if args.output_file and args.output_file != '-' and len(args.input_files) > 1:
+        print("Error: -o/--output option cannot be used with multiple input files", file=sys.stderr)
+        sys.exit(1)
+    
+    # If stdin is used, we can only process one file
+    if '-' in args.input_files and len(args.input_files) > 1:
+        print("Error: Cannot process stdin ('-') along with other files", file=sys.stderr)
+        sys.exit(1)
+    
+    # Process each file
+    total_files = len(args.input_files)
+    
+    for idx, input_file in enumerate(args.input_files, 1):
+        # Determine output file
+        if args.output_file:
+            output_file = args.output_file
+        else:
+            output_file = get_default_output_path(input_file)
+            
+        # Process the file
+        html_output = process_single_file(input_file)
+        
+        if html_output is None:
+            # Error already reported by process_single_file
+            continue
+        
+        # Write output
+        if output_file == '-':
+            sys.stdout.write(html_output)
+        else:
+            try:
+                with open(output_file, 'w') as f:
+                    f.write(html_output)
+                print(f"[{idx}/{total_files}] {output_file}")
+            except Exception as e:
+                print(f"Error writing output file: {e}", file=sys.stderr)
+                continue
 
 def get_default_output_path(input_file):
     """Generate a default output filename in the current directory with .html extension"""
@@ -126,18 +159,16 @@ def main():
 
         # 'dump' subcommand
         dump_parser = subparsers.add_parser('dump',
-                                          help='Process a file with terminal escape sequences and convert to HTML')
-        dump_parser.add_argument('input_file',
-                              help='Input file (use "-" for stdin)')
+                                          help='Process files with terminal escape sequences and convert to HTML')
+        dump_parser.add_argument('input_files', nargs='+',
+                              help='Input files (use "-" for stdin)')
         dump_parser.add_argument('-o', '--output', dest='output_file',
-                              help='Output file (default: <input_file>.html or stdout for stdin)')
+                              help='Output file (only valid for single input file)')
 
         # Parse the arguments
         args = parser.parse_args()
 
-        # If no output file is specified, use default naming
-        if args.output_file is None:
-            args.output_file = get_default_output_path(args.input_file)
+        # If no output file is specified, it will be determined for each input file
         dump_command(args)
     else:
         # Default mode: Run claude with logging
