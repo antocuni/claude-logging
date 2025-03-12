@@ -35,6 +35,12 @@ If you prefer a more classical installation method, you can use `pip`:
 pip install claude-logging
 ```
 
+## Claude config
+For best result, I suggest to enable "verbose output" in claude, so that the full content of the files and the external commands are displayed to the terminal and thus stored in the log. At the claude prompt, type `/settings` and select this:
+
+![image](https://github.com/user-attachments/assets/69b0e73a-f983-4fe1-9ec2-7ba2258b9a60)
+
+
 ## Usage
 
 ### Default Mode: Record Claude Sessions
